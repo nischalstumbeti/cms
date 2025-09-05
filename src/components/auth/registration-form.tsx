@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -64,8 +65,10 @@ export function RegistrationForm() {
       const profilePhotoUrl = reader.result as string;
       const finalProfession = values.profession === 'Others' ? values.otherProfession : values.profession;
       
+      const { profilePhoto, ...restOfValues } = values;
+
       const { success, message } = await addParticipant({ 
-          ...values,
+          ...restOfValues,
           profession: finalProfession!,
           profilePhotoUrl 
       });
