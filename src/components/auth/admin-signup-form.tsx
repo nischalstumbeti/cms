@@ -5,9 +5,8 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -23,11 +22,11 @@ import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
 const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1, { message: "Password is required." }),
+  email: z.string().email({ message: "Please enter a valid email." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 });
 
-export function AdminLoginForm() {
+export function AdminSignupForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -40,16 +39,20 @@ export function AdminLoginForm() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, values.email, values.password);
-      toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
+      await createUserWithEmailAndPassword(auth, values.email, values.password);
+      toast({
+        title: "Account Created",
+        description: "You have successfully created an admin account. Redirecting...",
+      });
       router.push("/admin/dashboard");
     } catch (error: any) {
-       toast({
+      toast({
         variant: "destructive",
-        title: "Login Failed",
-        description: "Invalid email or password.",
+        title: "Sign Up Failed",
+        description: error.message || "An unexpected error occurred.",
       });
-      setIsLoading(false);
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -85,15 +88,15 @@ export function AdminLoginForm() {
         />
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Sign In
+          Create Account
         </Button>
       </form>
     </Form>
     <div className="mt-4 text-center text-sm">
-      First time setup?{' '}
-      <Link href="/admin/signup" className="font-medium text-primary underline-offset-4 hover:underline">
-        Create Admin Account
-      </Link>
+        Already have an account?{' '}
+        <Link href="/admin/login" className="font-medium text-primary underline-offset-4 hover:underline">
+            Sign In
+        </Link>
     </div>
     </>
   );

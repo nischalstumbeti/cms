@@ -4,6 +4,8 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import {
   Bell,
   Gauge,
@@ -12,6 +14,7 @@ import {
   PenSquare,
   Settings,
   Users,
+  Loader2
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -47,24 +50,48 @@ const navItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsClient(true);
-    const isAdmin = localStorage.getItem('admin_session') === 'true';
-    if (!isAdmin) {
-      router.replace('/admin/login');
-    }
-  }, [router]);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        setUser(null);
+        // Allow access to login and signup pages
+        if (pathname !== '/admin/login' && pathname !== '/admin/signup') {
+          router.replace('/admin/login');
+        }
+      }
+      setLoading(false);
+    });
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_session');
+    return () => unsubscribe();
+  }, [router, pathname]);
+
+  const handleLogout = async () => {
+    await signOut(auth);
     router.push('/admin/login');
   };
 
-  if (!isClient) {
-    return null; // or a loading spinner
+  if (loading) {
+    return (
+        <div className="flex h-screen items-center justify-center">
+            <Loader2 className="h-12 w-12 animate-spin" />
+        </div>
+    );
   }
+  
+  if (!user && pathname !== '/admin/login' && pathname !== '/admin/signup') {
+      return null;
+  }
+  
+  // Render login/signup pages without the layout
+  if (!user) {
+    return <>{children}</>;
+  }
+
 
   return (
     <SidebarProvider>
@@ -112,13 +139,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                     <Avatar>
-                      <AvatarImage src="https://picsum.photos/100" alt="Admin" data-ai-hint="person user" />
-                      <AvatarFallback>A</AvatarFallback>
+                      <AvatarImage src={user.photoURL ?? "https://picsum.photos/100"} alt="Admin" data-ai-hint="person user" />
+                      <AvatarFallback>{user.email?.charAt(0).toUpperCase() ?? 'A'}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
+                  <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => router.push('/admin/settings')}>
                     Settings
