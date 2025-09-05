@@ -154,11 +154,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </Sidebar>
 
         <main className="flex-1">
-          <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6">
+          <header className="flex h-16 items-center border-b bg-card px-4 md:px-6">
             <div className="md:hidden">
               <SidebarTrigger />
             </div>
-            <div className="flex w-full items-center justify-end gap-4">
+            <div className="ml-auto flex items-center gap-4">
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
                 <span className="sr-only">Notifications</span>
