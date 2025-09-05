@@ -81,7 +81,7 @@
   }
   body {
     @apply text-foreground;
-    background: linear-gradient(180deg, #FF9933 0%, #FFFFFF 50%, #138808 100%);
+    background: linear-gradient(180deg, #FFDAB9 0%, #E6E6FA 50%, #98FB98 100%);
     background-attachment: fixed;
   }
 }
