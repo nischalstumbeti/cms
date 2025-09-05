@@ -62,7 +62,7 @@ export function SubmissionForm({ promptText, participantId }: SubmissionFormProp
         const file = values.submissionFile[0];
         const submissionDataUri = await fileToDataUri(file);
 
-        addSubmission({
+        await addSubmission({
             participantId,
             fileDataUri: submissionDataUri,
             fileName: file.name
@@ -75,7 +75,7 @@ export function SubmissionForm({ promptText, participantId }: SubmissionFormProp
 
         const result = await assessSubmissionAdherence({ submissionDataUri, promptText });
         
-        updateSubmission(participantId, {
+        await updateSubmission(participantId, {
             adherenceScore: result.adherenceScore,
             rationale: result.rationale
         });

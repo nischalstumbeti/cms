@@ -49,9 +49,9 @@ export function RegistrationForm() {
     setIsLoading(true);
     const reader = new FileReader();
     reader.readAsDataURL(values.profilePhoto[0]);
-    reader.onload = () => {
+    reader.onload = async () => {
       const profilePhotoUrl = reader.result as string;
-      const { success, message } = addParticipant({ ...values, profilePhotoUrl });
+      const { success, message } = await addParticipant({ ...values, profilePhotoUrl });
       
       if (success) {
         toast({

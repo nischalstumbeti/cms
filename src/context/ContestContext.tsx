@@ -1,6 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { collection, addDoc, getDocs, query, where, doc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import type { GenerateContestPromptOutput } from '@/ai/flows/automated-prompt-generation';
 
 // Types
@@ -14,19 +16,20 @@ export interface Participant {
 }
 
 export interface Submission {
+  id?: string;
   participantId: string;
   fileDataUri: string;
-  fileName: string;
+  fileName:string;
   adherenceScore?: number;
   rationale?: string;
 }
 
 interface ContestContextType {
   participants: Participant[];
-  addParticipant: (participant: Omit<Participant, 'id'>) => { success: boolean; message: string };
+  addParticipant: (participant: Omit<Participant, 'id'>) => Promise<{ success: boolean; message: string }>;
   submissions: Submission[];
-  addSubmission: (submission: Omit<Submission, 'adherenceScore' | 'rationale'>) => void;
-  updateSubmission: (participantId: string, data: Partial<Submission>) => void;
+  addSubmission: (submission: Omit<Submission, 'id' | 'adherenceScore' | 'rationale'>) => Promise<void>;
+  updateSubmission: (participantId: string, data: Partial<Submission>) => Promise<void>;
   findSubmissionByParticipantId: (id: string) => Submission | undefined;
   registrationOpen: boolean;
   setRegistrationOpen: (isOpen: boolean) => void;
@@ -44,27 +47,53 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
   const [registrationOpen, setRegistrationOpen] = useState(true);
   const [activePrompt, setActivePrompt] = useState<GenerateContestPromptOutput | null>(null);
 
-  const addParticipant = (participantData: Omit<Participant, 'id'>) => {
-    if (participants.some(p => p.email === participantData.email)) {
+  useEffect(() => {
+    const unsubParticipants = onSnapshot(collection(db, 'participants'), (snapshot) => {
+      const fetchedParticipants = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Participant));
+      setParticipants(fetchedParticipants);
+    });
+
+    const unsubSubmissions = onSnapshot(collection(db, 'submissions'), (snapshot) => {
+        const fetchedSubmissions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Submission));
+        setSubmissions(fetchedSubmissions);
+    });
+
+    return () => {
+        unsubParticipants();
+        unsubSubmissions();
+    };
+  }, []);
+
+  const addParticipant = async (participantData: Omit<Participant, 'id'>) => {
+    const q = query(collection(db, 'participants'), where("email", "==", participantData.email));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
       return { success: false, message: "An account with this email already exists." };
     }
-    const newParticipant: Participant = {
-      ...participantData,
-      id: `p${participants.length + 1}`,
-    };
-    setParticipants(prev => [...prev, newParticipant]);
+    
+    await addDoc(collection(db, 'participants'), participantData);
     return { success: true, message: "Registration successful!" };
   };
 
-  const addSubmission = (submissionData: Omit<Submission, 'adherenceScore' | 'rationale'>) => {
-    const newSubmission: Submission = {
-      ...submissionData,
-    };
-    setSubmissions(prev => [...prev.filter(s => s.participantId !== newSubmission.participantId), newSubmission]);
+  const addSubmission = async (submissionData: Omit<Submission, 'id'| 'adherenceScore' | 'rationale'>) => {
+     // Check if submission already exists
+    const existing = submissions.find(s => s.participantId === submissionData.participantId);
+    if (existing && existing.id) {
+        // Update existing document
+        const subDocRef = doc(db, 'submissions', existing.id);
+        await updateDoc(subDocRef, submissionData);
+    } else {
+        // Add new document
+        await addDoc(collection(db, 'submissions'), submissionData);
+    }
   };
 
-  const updateSubmission = (participantId: string, data: Partial<Submission>) => {
-    setSubmissions(prev => prev.map(s => s.participantId === participantId ? {...s, ...data} : s));
+  const updateSubmission = async (participantId: string, data: Partial<Submission>) => {
+    const submission = submissions.find(s => s.participantId === participantId);
+    if (submission && submission.id) {
+        const subDocRef = doc(db, 'submissions', submission.id);
+        await updateDoc(subDocRef, data);
+    }
   }
 
   const findSubmissionByParticipantId = (id: string) => submissions.find(s => s.participantId === id);
