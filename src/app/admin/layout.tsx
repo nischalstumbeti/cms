@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -7,6 +8,7 @@ import {
   Bell,
   Gauge,
   LogOut,
+  Megaphone,
   PenSquare,
   Settings,
   Users,
@@ -36,6 +38,7 @@ import {
 
 const navItems = [
   { href: '/admin/dashboard', icon: Gauge, label: 'Dashboard' },
+  { href: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
   { href: '/admin/participants', icon: Users, label: 'Participants' },
   { href: '/admin/prompt', icon: PenSquare, label: 'Prompt Generation' },
   { href: '/admin/settings', icon: Settings, label: 'Settings' },
@@ -76,7 +79,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <SidebarMenuItem key={item.href}>
                   <Link href={item.href}>
                     <SidebarMenuButton
-                      isActive={pathname === item.href}
+                      isActive={pathname.startsWith(item.href)}
                       className="w-full justify-start"
                     >
                       <item.icon className="h-4 w-4" />

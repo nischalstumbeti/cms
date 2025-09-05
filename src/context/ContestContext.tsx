@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { collection, addDoc, getDocs, query, where, doc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, doc, updateDoc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { GenerateContestPromptOutput } from '@/ai/flows/automated-prompt-generation';
 
@@ -25,6 +25,12 @@ export interface Submission {
   rationale?: string;
 }
 
+export interface Announcement {
+    title: string;
+    description: string;
+    theme: string;
+}
+
 interface ContestContextType {
   participants: Participant[];
   addParticipant: (participant: Omit<Participant, 'id'>) => Promise<{ success: boolean; message: string }>;
@@ -36,6 +42,8 @@ interface ContestContextType {
   setRegistrationOpen: (isOpen: boolean) => void;
   activePrompt: GenerateContestPromptOutput | null;
   setActivePrompt: (prompt: GenerateContestPromptOutput | null) => void;
+  announcement: Announcement | null;
+  updateAnnouncement: (announcement: Announcement) => Promise<void>;
 }
 
 // Context
@@ -47,6 +55,11 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [registrationOpen, setRegistrationOpen] = useState(true);
   const [activePrompt, setActivePrompt] = useState<GenerateContestPromptOutput | null>(null);
+  const [announcement, setAnnouncement] = useState<Announcement | null>({
+    title: "World Tourism Day 2025 Photography Contest",
+    description: "The District Administration is pleased to announce a photography contest to celebrate World Tourism Day 2025. Capture the beauty of our district's tourist destinations and win exciting prizes.",
+    theme: "Tourism & Green Investments"
+  });
 
   useEffect(() => {
     const unsubParticipants = onSnapshot(collection(db, 'participants'), (snapshot) => {
@@ -57,6 +70,12 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
     const unsubSubmissions = onSnapshot(collection(db, 'submissions'), (snapshot) => {
         const fetchedSubmissions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Submission));
         setSubmissions(fetchedSubmissions);
+    });
+
+    const unsubAnnouncement = onSnapshot(doc(db, 'settings', 'announcement'), (doc) => {
+        if (doc.exists()) {
+            setAnnouncement(doc.data() as Announcement);
+        }
     });
 
     // Load from local storage
@@ -73,6 +92,7 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
     return () => {
         unsubParticipants();
         unsubSubmissions();
+        unsubAnnouncement();
     };
   }, []);
 
@@ -124,6 +144,11 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
       }
   }
 
+  const updateAnnouncement = async (announcementData: Announcement) => {
+      const announcementRef = doc(db, 'settings', 'announcement');
+      await setDoc(announcementRef, announcementData);
+  }
+
 
   const value = {
     participants,
@@ -136,6 +161,8 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
     setRegistrationOpen: handleSetRegistrationOpen,
     activePrompt,
     setActivePrompt: handleSetActivePrompt,
+    announcement,
+    updateAnnouncement,
   };
 
   return (
