@@ -10,12 +10,12 @@ export default function Home() {
       <header className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-4">
           <Image src="https://picsum.photos/40/40" alt="Govt Logo" width={40} height={40} className="rounded-full" data-ai-hint="emblem logo" />
-        </div>
-        <div className="text-center">
+          <div>
             <div className="font-headline text-xl font-bold tracking-tight">
                 Official Tourism Day Contest
             </div>
             <p className="text-sm text-muted-foreground">Government of India</p>
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <Button variant="ghost" asChild>
