@@ -17,8 +17,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Roboto', 'sans-serif'],
-        headline: ['Montserrat', 'sans-serif'],
+        body: ['Tahoma', 'sans-serif'],
+        headline: ['Verdana', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {

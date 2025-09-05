@@ -3,13 +3,17 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Award, Camera, Globe } from 'lucide-react';
-import { Logo } from '@/components/logo';
 
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
-        <Logo />
+        <div className="flex items-center gap-4">
+          <Image src="https://picsum.photos/40/40" alt="Govt Logo" width={40} height={40} className="rounded-full" data-ai-hint="emblem logo" />
+          <div className="font-headline text-xl font-bold tracking-tight">
+            Incredible India Contest
+          </div>
+        </div>
         <div className="flex items-center gap-4">
           <Button variant="ghost" asChild>
             <Link href="/login">Participant Login</Link>
@@ -24,25 +28,22 @@ export default function Home() {
         <section className="relative w-full h-[60vh] text-white">
            <Image
             src="https://picsum.photos/1200/800"
-            alt="Hero background image of the Taj Mahal"
+            alt="Hero background image of a monument in India"
             fill
             className="object-cover"
-            data-ai-hint="taj mahal"
+            data-ai-hint="india gate"
           />
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative h-full flex flex-col items-center justify-center container text-center">
             <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-              Incredible India Contests
+              Official Tourism Day Contest
             </h1>
             <p className="mx-auto mt-4 max-w-[700px] text-lg md:text-xl text-primary-foreground/90">
-              Showcase the beauty and diversity of India through your creative lens.
+              Celebrate the spirit of India by showcasing its beauty. An initiative by the Government of India.
             </p>
             <div className="mt-8 flex justify-center gap-4">
               <Button size="lg" asChild>
-                <Link href="/register">Join a Contest</Link>
-              </Button>
-              <Button size="lg" variant="secondary" asChild>
-                <Link href="#features">Learn More</Link>
+                <Link href="/register">Participate Now</Link>
               </Button>
             </div>
           </div>
@@ -99,9 +100,8 @@ export default function Home() {
 
       <footer className="border-t bg-card">
         <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-8 md:flex-row md:px-6">
-          <Logo />
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} ContestZen. All rights reserved.
+            © {new Date().getFullYear()} Government of India. All rights reserved.
           </p>
           <nav className="flex gap-4">
             <Link href="/admin/login" className="text-sm text-muted-foreground hover:text-foreground">
