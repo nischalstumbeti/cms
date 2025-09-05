@@ -19,17 +19,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useContest } from "@/context/ContestContext";
 
 const formSchema = z.object({
   email: z.string().email("A valid email is required."),
   password: z.string().min(1, { message: "Password is required." }),
 });
 
-// Mock user data with roles
-const ADMIN_USERS = {
-    "admin@contestzen.com": { pass: "99230041300", role: "superadmin" },
-    "viewer@contestzen.com": { pass: "password123", role: "admin" },
-};
+const SUPER_ADMIN_CREDENTIALS = {
+    email: "admin@contestzen.com",
+    pass: "99230041300"
+}
 
 const setAdminSession = (user: {email: string, role: string}) => {
     if (typeof window !== 'undefined') {
@@ -40,6 +40,7 @@ const setAdminSession = (user: {email: string, role: string}) => {
 export function AdminLoginForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const { admins } = useContest();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -49,20 +50,33 @@ export function AdminLoginForm() {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    const adminUser = ADMIN_USERS[values.email as keyof typeof ADMIN_USERS];
 
-    if (adminUser && values.password === adminUser.pass) {
+    // Check for Super Admin
+    if (values.email === SUPER_ADMIN_CREDENTIALS.email && values.password === SUPER_ADMIN_CREDENTIALS.pass) {
+        setAdminSession({email: values.email, role: 'superadmin'});
+        toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
+        router.push("/admin/dashboard");
+        return;
+    }
+    
+    // Check for regular admins
+    const adminUser = admins.find(admin => admin.email === values.email);
+    // Note: In a real app, passwords should be hashed and checked securely on a server.
+    // For this prototype, we'll use a placeholder password "password123" for all created admins.
+    if (adminUser && values.password === 'password123') {
         setAdminSession({email: values.email, role: adminUser.role});
         toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
         router.push("/admin/dashboard");
-    } else {
-       toast({
+        return;
+    }
+
+
+    toast({
         variant: "destructive",
         title: "Login Failed",
         description: "Invalid credentials.",
-      });
-      setIsLoading(false);
-    }
+    });
+    setIsLoading(false);
   };
 
   return (

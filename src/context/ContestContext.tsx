@@ -16,6 +16,17 @@ export interface Participant {
   profilePhotoUrl?: string;
 }
 
+export interface Admin {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    department: string;
+    government: 'state' | 'central';
+    place: string;
+    role: 'superadmin' | 'admin';
+}
+
 export interface Submission {
   id?: string;
   participantId: string;
@@ -40,6 +51,8 @@ export interface Branding {
 interface ContestContextType {
   participants: Participant[];
   addParticipant: (participant: Omit<Participant, 'id'>) => Promise<{ success: boolean; message: string }>;
+  admins: Admin[];
+  addAdmin: (admin: Omit<Admin, 'id' | 'role'>) => Promise<{ success: boolean; message: string }>;
   submissions: Submission[];
   addSubmission: (submission: Omit<Submission, 'id' | 'adherenceScore' | 'rationale'>) => Promise<void>;
   updateSubmission: (participantId: string, data: Partial<Submission>) => Promise<void>;
@@ -60,6 +73,7 @@ const ContestContext = createContext<ContestContextType | undefined>(undefined);
 // Provider
 export const ContestProvider = ({ children }: { children: ReactNode }) => {
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [admins, setAdmins] = useState<Admin[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [registrationOpen, setRegistrationOpen] = useState(true);
   const [activePrompt, setActivePrompt] = useState<GenerateContestPromptOutput | null>(null);
@@ -78,6 +92,11 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
     const unsubParticipants = onSnapshot(collection(db, 'participants'), (snapshot) => {
       const fetchedParticipants = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Participant));
       setParticipants(fetchedParticipants);
+    });
+
+    const unsubAdmins = onSnapshot(collection(db, 'admins'), (snapshot) => {
+        const fetchedAdmins = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Admin));
+        setAdmins(fetchedAdmins);
     });
 
     const unsubSubmissions = onSnapshot(collection(db, 'submissions'), (snapshot) => {
@@ -111,6 +130,7 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
         unsubParticipants();
+        unsubAdmins();
         unsubSubmissions();
         unsubAnnouncement();
         unsubBranding();
@@ -127,6 +147,17 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
     await addDoc(collection(db, 'participants'), participantData);
     return { success: true, message: "Registration successful!" };
   };
+
+  const addAdmin = async (adminData: Omit<Admin, 'id' | 'role'>) => {
+      const q = query(collection(db, 'admins'), where("email", "==", adminData.email));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+          return { success: false, message: "An admin with this email already exists." };
+      }
+
+      await addDoc(collection(db, 'admins'), { ...adminData, role: 'admin' });
+      return { success: true, message: "Admin created successfully." };
+  }
 
   const addSubmission = async (submissionData: Omit<Submission, 'id'| 'adherenceScore' | 'rationale'>) => {
      // Check if submission already exists
@@ -179,6 +210,8 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
   const value = {
     participants,
     addParticipant,
+    admins,
+    addAdmin,
     submissions,
     addSubmission,
     updateSubmission,
