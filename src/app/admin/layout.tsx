@@ -60,24 +60,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const sessionStr = localStorage.getItem('admin_session');
-      if (sessionStr) {
-        const sessionData: AdminSession = JSON.parse(sessionStr);
-        setSession(sessionData);
-      } else {
-        setSession(null);
-        if (pathname !== '/admin/login') {
-          router.replace('/admin/login');
+    // This effect should only run on the client side
+    if (typeof window !== 'undefined') {
+      try {
+        const sessionStr = localStorage.getItem('admin_session');
+        if (sessionStr) {
+          const sessionData: AdminSession = JSON.parse(sessionStr);
+          setSession(sessionData);
+        } else {
+          setSession(null);
+          if (pathname !== '/admin/login') {
+            router.replace('/admin/login');
+          }
         }
-      }
-    } catch (error) {
+      } catch (error) {
+        console.error("Failed to parse admin session", error);
         setSession(null);
         if (pathname !== '/admin/login') {
             router.replace('/admin/login');
         }
-    } finally {
-      setLoading(false);
+      } finally {
+        setLoading(false);
+      }
     }
   }, [router, pathname]);
 
@@ -105,13 +109,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
+  // If we are on any admin page that's not the login page and there's no session, we shouldn't render anything,
+  // the useEffect above will handle the redirect. This prevents flashing the page content.
   if (!session && pathname !== '/admin/login') {
     return null;
   }
 
+  // If there's no session, only render the children (which should be the login page)
   if (!session) {
     return <>{children}</>;
   }
+
 
   return (
     <SidebarProvider>
