@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Award, Camera, Globe } from 'lucide-react';
+import { RegistrationForm } from '@/components/auth/registration-form';
+import { NoticeBoard } from '@/components/notice-board';
 
 export default function Home() {
   return (
@@ -27,78 +27,17 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-1">
-        <section className="relative w-full h-[60vh] text-white">
-           <Image
-            src="https://picsum.photos/1200/800"
-            alt="Hero background image of a monument in India"
-            fill
-            className="object-cover"
-            data-ai-hint="india gate"
-          />
-          <div className="absolute inset-0 bg-black/50" />
-          <div className="relative h-full flex flex-col items-center justify-center container text-center">
-            <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-              Incredible India Contest
-            </h1>
-            <p className="mx-auto mt-4 max-w-[700px] text-lg md:text-xl text-primary-foreground/90">
-              Celebrate the spirit of India by showcasing its beauty. An initiative by the Government of India.
-            </p>
-            <div className="mt-8 flex justify-center gap-4">
-              <Button size="lg" asChild>
-                <Link href="/register">Participate Now</Link>
-              </Button>
-            </div>
+      <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
+        <div className="grid md:grid-cols-2 gap-12 items-start">
+          <div className="space-y-6">
+            <NoticeBoard />
           </div>
-        </section>
-
-        <section id="features" className="py-20 md:py-32">
-          <div className="container space-y-12">
-            <div className="text-center">
-              <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl">
-                Explore the Wonders of India
-              </h2>
-              <p className="mx-auto mt-4 max-w-[700px] text-muted-foreground">
-                Participate in photography, videography, and writing contests that celebrate India's rich culture, heritage, and landscapes.
-              </p>
-            </div>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              <Card>
-                <CardContent className="flex flex-col items-center gap-4 p-6 text-center">
-                  <div className="rounded-full bg-primary/10 p-4 text-primary">
-                    <Camera className="h-8 w-8" />
-                  </div>
-                  <h3 className="font-headline text-xl font-bold">Photography Contests</h3>
-                  <p className="text-muted-foreground">
-                    Capture stunning landscapes, vibrant festivals, and everyday life.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="flex flex-col items-center gap-4 p-6 text-center">
-                  <div className="rounded-full bg-primary/10 p-4 text-primary">
-                    <Globe className="h-8 w-8" />
-                  </div>
-                  <h3 className="font-headline text-xl font-bold">Cultural Showcases</h3>
-                  <p className="text-muted-foreground">
-                    Share stories, poems, or videos that bring Indian traditions to life.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="flex flex-col items-center gap-4 p-6 text-center">
-                  <div className="rounded-full bg-primary/10 p-4 text-primary">
-                    <Award className="h-8 w-8" />
-                  </div>
-                  <h3 className="font-headline text-xl font-bold">Win Amazing Prizes</h3>
-                  <p className="text-muted-foreground">
-                    Get recognized for your talent and win exciting prizes and travel vouchers.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+          <div className="space-y-6">
+             <h2 className="font-headline text-3xl font-bold tracking-tight text-center">Register for the Contest</h2>
+             <p className="text-muted-foreground text-center">Fill out the form below to participate.</p>
+             <RegistrationForm />
           </div>
-        </section>
+        </div>
       </main>
 
       <footer className="border-t bg-card">

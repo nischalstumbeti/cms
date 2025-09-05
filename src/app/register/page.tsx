@@ -11,7 +11,7 @@ export default function RegisterPage() {
   const { registrationOpen } = useContest();
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="flex justify-center">
           <Logo />
@@ -38,6 +38,11 @@ export default function RegisterPage() {
               <Link href="/login" className="font-medium text-primary underline-offset-4 hover:underline">
                 Sign in
               </Link>
+            </div>
+            <div className="mt-4 text-center text-sm">
+                <Link href="/" className="font-medium text-muted-foreground underline-offset-4 hover:underline">
+                    Back to Home
+                </Link>
             </div>
           </CardContent>
         </Card>
