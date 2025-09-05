@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/tabs"
 import { ParticipantTable } from "@/components/dashboard/participant-table"
 import { AdminTable } from "@/components/dashboard/admin-table"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function UsersPage() {
   return (
