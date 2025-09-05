@@ -59,6 +59,17 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
         setSubmissions(fetchedSubmissions);
     });
 
+    // Load from local storage
+    const storedPrompt = localStorage.getItem('activePrompt');
+    if (storedPrompt) {
+      setActivePrompt(JSON.parse(storedPrompt));
+    }
+    const storedRegistrationStatus = localStorage.getItem('registrationOpen');
+    if (storedRegistrationStatus) {
+        setRegistrationOpen(JSON.parse(storedRegistrationStatus));
+    }
+
+
     return () => {
         unsubParticipants();
         unsubSubmissions();
@@ -98,6 +109,20 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const findSubmissionByParticipantId = (id: string) => submissions.find(s => s.participantId === id);
+  
+  const handleSetRegistrationOpen = (isOpen: boolean) => {
+      setRegistrationOpen(isOpen);
+      localStorage.setItem('registrationOpen', JSON.stringify(isOpen));
+  }
+
+  const handleSetActivePrompt = (prompt: GenerateContestPromptOutput | null) => {
+      setActivePrompt(prompt);
+      if(prompt) {
+          localStorage.setItem('activePrompt', JSON.stringify(prompt));
+      } else {
+          localStorage.removeItem('activePrompt');
+      }
+  }
 
 
   const value = {
@@ -108,9 +133,9 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
     updateSubmission,
     findSubmissionByParticipantId,
     registrationOpen,
-    setRegistrationOpen,
+    setRegistrationOpen: handleSetRegistrationOpen,
     activePrompt,
-    setActivePrompt,
+    setActivePrompt: handleSetActivePrompt,
   };
 
   return (

@@ -25,10 +25,20 @@ import { Loader2 } from "lucide-react";
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  profession: z.string().min(2, { message: "Profession must be at least 2 characters." }),
+  profession: z.string({ required_error: "Please select your profession." }),
+  otherProfession: z.string().optional(),
   gender: z.enum(['male', 'female', 'other', 'prefer-not-to-say'], {required_error: "Please select a gender."}),
   profilePhoto: z.any().refine(file => file?.[0], "Profile photo is required."),
+}).refine(data => {
+    if (data.profession === 'Others') {
+        return !!data.otherProfession && data.otherProfession.length > 0;
+    }
+    return true;
+}, {
+    message: "Please specify your profession",
+    path: ["otherProfession"],
 });
+
 
 export function RegistrationForm() {
   const router = useRouter();
@@ -41,9 +51,10 @@ export function RegistrationForm() {
     defaultValues: {
       name: "",
       email: "",
-      profession: "",
     },
   });
+
+  const professionValue = form.watch("profession");
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -51,7 +62,13 @@ export function RegistrationForm() {
     reader.readAsDataURL(values.profilePhoto[0]);
     reader.onload = async () => {
       const profilePhotoUrl = reader.result as string;
-      const { success, message } = await addParticipant({ ...values, profilePhotoUrl });
+      const finalProfession = values.profession === 'Others' ? values.otherProfession : values.profession;
+      
+      const { success, message } = await addParticipant({ 
+          ...values,
+          profession: finalProfession!,
+          profilePhotoUrl 
+      });
       
       if (success) {
         toast({
@@ -113,13 +130,40 @@ export function RegistrationForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Profession</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Photographer, Writer" {...field} />
-              </FormControl>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select your profession" />
+                    </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                        <SelectItem value="Student">Student</SelectItem>
+                        <SelectItem value="Employed (Govt/Private)">Employed (Govt/Private)</SelectItem>
+                        <SelectItem value="Self-Employed / Business">Self-Employed / Business</SelectItem>
+                        <SelectItem value="Homemaker">Homemaker</SelectItem>
+                        <SelectItem value="Retired">Retired</SelectItem>
+                        <SelectItem value="Others">Others</SelectItem>
+                    </SelectContent>
+                </Select>
               <FormMessage />
             </FormItem>
           )}
         />
+        {professionValue === 'Others' && (
+            <FormField
+            control={form.control}
+            name="otherProfession"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Please Specify</FormLabel>
+                <FormControl>
+                    <Input placeholder="Your profession" {...field} />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+        )}
         <FormField
           control={form.control}
           name="gender"
