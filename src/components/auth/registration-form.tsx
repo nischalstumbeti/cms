@@ -26,7 +26,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
   profession: z.string().min(2, { message: "Profession must be at least 2 characters." }),
-  gender: z.enum(['male', 'female', 'other', 'prefer-not-to-say']),
+  gender: z.enum(['male', 'female', 'other', 'prefer-not-to-say'], {required_error: "Please select a gender."}),
   profilePhoto: z.any().refine(file => file?.[0], "Profile photo is required."),
 });
 
