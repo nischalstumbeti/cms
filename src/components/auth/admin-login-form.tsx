@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -5,8 +6,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,15 +16,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Input }s from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
 
 const formSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email("A valid email is required."),
   password: z.string().min(1, { message: "Password is required." }),
 });
+
+const ADMIN_EMAIL = "admin@contestzen.com";
+const ADMIN_PASS = "99230041300";
+
+const setAdminSession = () => {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('admin_session', 'true');
+    }
+}
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -37,24 +44,23 @@ export function AdminLoginForm() {
     defaultValues: { email: "", password: "" },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, values.email, values.password);
-      toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
-      router.push("/admin/dashboard");
-    } catch (error: any) {
+    if (values.email === ADMIN_EMAIL && values.password === ADMIN_PASS) {
+        setAdminSession();
+        toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
+        router.push("/admin/dashboard");
+    } else {
        toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Invalid email or password.",
+        description: "Invalid credentials.",
       });
       setIsLoading(false);
     }
   };
 
   return (
-    <>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
@@ -64,7 +70,7 @@ export function AdminLoginForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="admin@example.com" {...field} />
+                <Input placeholder="admin@contestzen.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -89,12 +95,5 @@ export function AdminLoginForm() {
         </Button>
       </form>
     </Form>
-    <div className="mt-4 text-center text-sm">
-      First time setup?{' '}
-      <Link href="/admin/signup" className="font-medium text-primary underline-offset-4 hover:underline">
-        Create Admin Account
-      </Link>
-    </div>
-    </>
   );
 }
