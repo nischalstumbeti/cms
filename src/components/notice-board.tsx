@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export function NoticeBoard() {
   return (
-    <Card className="relative overflow-hidden border-primary/20">
-      <CardHeader className="relative bg-primary/5">
+    <Card className="glass-card">
+      <CardHeader className="relative">
          <div className="animate-pulse absolute top-4 right-4 h-3 w-3 rounded-full bg-destructive" />
         <CardTitle className="flex items-center gap-3 font-headline text-2xl font-bold text-primary">
           <Megaphone className="h-8 w-8" />
