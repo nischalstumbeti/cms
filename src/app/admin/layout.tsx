@@ -9,7 +9,6 @@ import {
   Gauge,
   LogOut,
   Megaphone,
-  PenSquare,
   Settings,
   Users,
   Loader2,
@@ -45,7 +44,6 @@ const navItems = [
   { href: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
   { href: '/admin/participants', icon: Users, label: 'Participants' },
   { href: '/admin/submissions', icon: Camera, label: 'Submissions' },
-  { href: '/admin/prompt', icon: PenSquare, label: 'Prompt Generation' },
   { href: '/admin/settings', icon: Settings, label: 'Settings' },
 ];
 
