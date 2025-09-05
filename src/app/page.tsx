@@ -1,7 +1,8 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Award, BrainCircuit, Users } from 'lucide-react';
+import { Award, Camera, Globe } from 'lucide-react';
 import { Logo } from '@/components/logo';
 
 export default function Home() {
@@ -20,25 +21,27 @@ export default function Home() {
       </header>
 
       <main className="flex-1">
-        <section className="relative py-20 text-center md:py-32 lg:py-40">
-          <div
-            className="absolute inset-0 -z-10 bg-primary/10"
-            style={{
-              clipPath: 'polygon(0 0, 100% 0, 100% 80%, 0 100%)',
-            }}
+        <section className="relative w-full h-[60vh] text-white">
+           <Image
+            src="https://picsum.photos/1200/800"
+            alt="Hero background image of the Taj Mahal"
+            fill
+            className="object-cover"
+            data-ai-hint="taj mahal"
           />
-          <div className="container">
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative h-full flex flex-col items-center justify-center container text-center">
             <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-              ContestZen
+              Incredible India Contests
             </h1>
-            <p className="mx-auto mt-4 max-w-[700px] text-lg text-muted-foreground md:text-xl">
-              Unleash Creativity, Seamlessly.
+            <p className="mx-auto mt-4 max-w-[700px] text-lg md:text-xl text-primary-foreground/90">
+              Showcase the beauty and diversity of India through your creative lens.
             </p>
             <div className="mt-8 flex justify-center gap-4">
               <Button size="lg" asChild>
-                <Link href="/register">Get Started</Link>
+                <Link href="/register">Join a Contest</Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" variant="secondary" asChild>
                 <Link href="#features">Learn More</Link>
               </Button>
             </div>
@@ -49,32 +52,32 @@ export default function Home() {
           <div className="container space-y-12">
             <div className="text-center">
               <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl">
-                All-in-One Contest Platform
+                Explore the Wonders of India
               </h2>
               <p className="mx-auto mt-4 max-w-[700px] text-muted-foreground">
-                From registration to submission, ContestZen provides the tools you need to run a successful creative contest.
+                Participate in photography, videography, and writing contests that celebrate India's rich culture, heritage, and landscapes.
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <CardContent className="flex flex-col items-center gap-4 p-6 text-center">
                   <div className="rounded-full bg-primary/10 p-4 text-primary">
-                    <Users className="h-8 w-8" />
+                    <Camera className="h-8 w-8" />
                   </div>
-                  <h3 className="font-headline text-xl font-bold">Easy Registration</h3>
+                  <h3 className="font-headline text-xl font-bold">Photography Contests</h3>
                   <p className="text-muted-foreground">
-                    A simple and secure form to collect participant details and profile photos.
+                    Capture stunning landscapes, vibrant festivals, and everyday life.
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="flex flex-col items-center gap-4 p-6 text-center">
                   <div className="rounded-full bg-primary/10 p-4 text-primary">
-                    <BrainCircuit className="h-8 w-8" />
+                    <Globe className="h-8 w-8" />
                   </div>
-                  <h3 className="font-headline text-xl font-bold">AI-Powered Prompts</h3>
+                  <h3 className="font-headline text-xl font-bold">Cultural Showcases</h3>
                   <p className="text-muted-foreground">
-                    Generate unique contest themes with AI and automatically assess submissions for adherence.
+                    Share stories, poems, or videos that bring Indian traditions to life.
                   </p>
                 </CardContent>
               </Card>
@@ -83,9 +86,9 @@ export default function Home() {
                   <div className="rounded-full bg-primary/10 p-4 text-primary">
                     <Award className="h-8 w-8" />
                   </div>
-                  <h3 className="font-headline text-xl font-bold">Admin Dashboard</h3>
+                  <h3 className="font-headline text-xl font-bold">Win Amazing Prizes</h3>
                   <p className="text-muted-foreground">
-                    Manage participants, control contest status, and view insightful analytics.
+                    Get recognized for your talent and win exciting prizes and travel vouchers.
                   </p>
                 </CardContent>
               </Card>
