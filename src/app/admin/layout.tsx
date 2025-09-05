@@ -46,7 +46,8 @@ interface AdminSession {
 const allNavItems = [
   { href: '/admin/dashboard', icon: Gauge, label: 'Dashboard', roles: ['superadmin', 'admin'] },
   { href: '/admin/announcements', icon: Megaphone, label: 'Announcements', roles: ['superadmin'] },
-  { href: '/admin/participants', icon: Users, label: 'Participants', roles: ['superadmin', 'admin'] },
+  { href: '/admin/users', icon: Users, label: 'Users', roles: ['superadmin'] },
+  { href: '/admin/participants', icon: Users, label: 'Participants', roles: ['admin'] },
   { href: '/admin/submissions', icon: Camera, label: 'Submissions', roles: ['superadmin', 'admin'] },
   { href: '/admin/branding', icon: Brush, label: 'Branding', roles: ['superadmin'] },
   { href: '/admin/settings', icon: Settings, label: 'Settings', roles: ['superadmin'] },
@@ -86,7 +87,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/admin/login');
   };
 
-  const navItems = session ? allNavItems.filter(item => item.roles.includes(session.role)) : [];
+  const navItems = session ? allNavItems.filter(item => {
+    if (!item.roles.includes(session.role)) return false;
+    // Special rule to hide /admin/participants for superadmin
+    if (session.role === 'superadmin' && item.href === '/admin/participants') return false;
+    // Special rule to hide /admin/users for admin
+    if (session.role === 'admin' && item.href === '/admin/users') return false;
+    return true;
+  }) : [];
+
 
   if (loading) {
     return (
