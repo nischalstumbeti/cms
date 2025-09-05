@@ -19,51 +19,36 @@ export function ParticipantTable() {
 
   return (
     <Card>
-        <CardHeader>
-            <CardTitle>Participants</CardTitle>
-            <CardDescription>A list of all registered participants in the contest.</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <div className="rounded-lg border">
-            <Table>
-                <TableHeader>
-                <TableRow>
-                    <TableHead className="w-[80px]">Avatar</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Profession</TableHead>
-                    <TableHead>Gender</TableHead>
-                </TableRow>
-                </TableHeader>
-                <TableBody>
-                {participants.length > 0 ? (
-                    participants.map((p) => (
-                    <TableRow key={p.id}>
-                        <TableCell>
-                        <Avatar>
-                            <AvatarImage src={p.profilePhotoUrl} alt={p.name} />
-                            <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        </TableCell>
-                        <TableCell className="font-medium">{p.name}</TableCell>
-                        <TableCell>{p.email}</TableCell>
-                        <TableCell>{p.profession}</TableCell>
-                        <TableCell>
-                        <Badge variant="secondary">{p.gender}</Badge>
-                        </TableCell>
-                    </TableRow>
-                    ))
-                ) : (
-                    <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
-                        No participants yet.
-                    </TableCell>
-                    </TableRow>
-                )}
-                </TableBody>
-            </Table>
+      <CardHeader>
+        <CardTitle>Participants</CardTitle>
+        <CardDescription>A list of all registered participants in the contest.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {participants.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {participants.map((p) => (
+              <Card key={p.id} className="text-center">
+                <CardContent className="flex flex-col items-center p-6 space-y-4">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={p.profilePhotoUrl} alt={p.name} />
+                    <AvatarFallback className="text-3xl">{p.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-2 text-sm">
+                     <p className="font-bold text-base text-foreground">{p.name}</p>
+                     <p className="text-muted-foreground">{p.email}</p>
+                     <p className="text-foreground">{p.profession}</p>
+                     <Badge variant="secondary" className="capitalize">{p.gender.replace(/-/g, ' ')}</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+            <div className="text-center text-muted-foreground py-12">
+                No participants yet.
             </div>
-        </CardContent>
+        )}
+      </CardContent>
     </Card>
   );
 }
