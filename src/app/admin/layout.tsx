@@ -14,6 +14,7 @@ import {
   Users,
   Loader2,
   User as UserIcon,
+  Camera,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -43,6 +44,7 @@ const navItems = [
   { href: '/admin/dashboard', icon: Gauge, label: 'Dashboard' },
   { href: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
   { href: '/admin/participants', icon: Users, label: 'Participants' },
+  { href: '/admin/submissions', icon: Camera, label: 'Submissions' },
   { href: '/admin/prompt', icon: PenSquare, label: 'Prompt Generation' },
   { href: '/admin/settings', icon: Settings, label: 'Settings' },
 ];
