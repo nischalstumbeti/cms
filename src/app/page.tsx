@@ -1,21 +1,36 @@
+
+"use client";
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { RegistrationForm } from '@/components/auth/registration-form';
 import { NoticeBoard } from '@/components/notice-board';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useContest } from '@/context/ContestContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
+    const { branding } = useContest();
   return (
     <div className="flex min-h-screen flex-col">
       <header className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6 bg-transparent">
         <div className="flex items-center gap-4">
           <Image src="https://picsum.photos/40/40" alt="Govt Logo" width={40} height={40} className="rounded-full" data-ai-hint="emblem logo" />
           <div>
-            <div className="font-headline text-xl font-bold tracking-tight text-foreground">
-                Official Tourism Day Contest
-            </div>
-            <p className="text-sm text-muted-foreground">Government of India</p>
+            {branding ? (
+                <>
+                 <div className="font-headline text-xl font-bold tracking-tight text-foreground">
+                    {branding.headerTitle}
+                 </div>
+                 <p className="text-sm text-muted-foreground">{branding.headerSubtitle}</p>
+                </>
+            ) : (
+                <div className='space-y-2'>
+                    <Skeleton className='h-6 w-48' />
+                    <Skeleton className='h-4 w-32' />
+                </div>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -49,9 +64,11 @@ export default function Home() {
 
       <footer className="border-t bg-transparent">
         <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-6 md:flex-row md:px-6">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Government of India. All rights reserved.
-          </p>
+           {branding ? (
+             <p className="text-sm text-muted-foreground">
+                {branding.footerText}
+             </p>
+            ) : <Skeleton className='h-4 w-72' />}
           <nav className="flex gap-4">
             <Link href="/admin/login" className="text-sm text-muted-foreground hover:text-foreground">
               Admin Login

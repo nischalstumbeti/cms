@@ -31,6 +31,12 @@ export interface Announcement {
     theme: string;
 }
 
+export interface Branding {
+    headerTitle: string;
+    headerSubtitle: string;
+    footerText: string;
+}
+
 interface ContestContextType {
   participants: Participant[];
   addParticipant: (participant: Omit<Participant, 'id'>) => Promise<{ success: boolean; message: string }>;
@@ -44,6 +50,8 @@ interface ContestContextType {
   setActivePrompt: (prompt: GenerateContestPromptOutput | null) => void;
   announcement: Announcement | null;
   updateAnnouncement: (announcement: Announcement) => Promise<void>;
+  branding: Branding | null;
+  updateBranding: (branding: Branding) => Promise<void>;
 }
 
 // Context
@@ -59,6 +67,11 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
     title: "World Tourism Day 2025 Photography Contest",
     description: "The District Administration is pleased to announce a photography contest to celebrate World Tourism Day 2025. Capture the beauty of our district's tourist destinations and win exciting prizes.",
     theme: "Tourism & Green Investments"
+  });
+  const [branding, setBranding] = useState<Branding | null>({
+      headerTitle: "Official Tourism Day Contest",
+      headerSubtitle: "Government of India",
+      footerText: `© ${new Date().getFullYear()} Government of India. All rights reserved.`
   });
 
   useEffect(() => {
@@ -78,6 +91,13 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
         }
     });
 
+    const unsubBranding = onSnapshot(doc(db, 'settings', 'branding'), (doc) => {
+        if (doc.exists()) {
+            setBranding(doc.data() as Branding);
+        }
+    });
+
+
     // Load from local storage
     const storedPrompt = localStorage.getItem('activePrompt');
     if (storedPrompt) {
@@ -93,6 +113,7 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
         unsubParticipants();
         unsubSubmissions();
         unsubAnnouncement();
+        unsubBranding();
     };
   }, []);
 
@@ -149,6 +170,11 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
       await setDoc(announcementRef, announcementData);
   }
 
+  const updateBranding = async (brandingData: Branding) => {
+      const brandingRef = doc(db, 'settings', 'branding');
+      await setDoc(brandingRef, brandingData);
+  }
+
 
   const value = {
     participants,
@@ -163,6 +189,8 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
     setActivePrompt: handleSetActivePrompt,
     announcement,
     updateAnnouncement,
+    branding,
+    updateBranding,
   };
 
   return (
