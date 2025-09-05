@@ -10,9 +10,12 @@ export default function Home() {
       <header className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-4">
           <Image src="https://picsum.photos/40/40" alt="Govt Logo" width={40} height={40} className="rounded-full" data-ai-hint="emblem logo" />
-          <div className="font-headline text-xl font-bold tracking-tight">
-            Incredible India Contest
-          </div>
+        </div>
+        <div className="text-center">
+            <div className="font-headline text-xl font-bold tracking-tight">
+                Official Tourism Day Contest
+            </div>
+            <p className="text-sm text-muted-foreground">Government of India</p>
         </div>
         <div className="flex items-center gap-4">
           <Button variant="ghost" asChild>
@@ -36,7 +39,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative h-full flex flex-col items-center justify-center container text-center">
             <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-              Official Tourism Day Contest
+              Incredible India Contest
             </h1>
             <p className="mx-auto mt-4 max-w-[700px] text-lg md:text-xl text-primary-foreground/90">
               Celebrate the spirit of India by showcasing its beauty. An initiative by the Government of India.
