@@ -12,7 +12,6 @@ import {
   Settings,
   Users,
   Loader2,
-  User as UserIcon,
   Camera,
   Brush,
 } from 'lucide-react';
@@ -28,7 +27,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Logo } from '@/components/logo';
 import {
   DropdownMenu,
@@ -39,56 +38,71 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+interface AdminSession {
+  email: string;
+  role: 'superadmin' | 'admin';
+}
 
-const navItems = [
-  { href: '/admin/dashboard', icon: Gauge, label: 'Dashboard' },
-  { href: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
-  { href: '/admin/participants', icon: Users, label: 'Participants' },
-  { href: '/admin/submissions', icon: Camera, label: 'Submissions' },
-  { href: '/admin/branding', icon: Brush, label: 'Branding' },
-  { href: '/admin/settings', icon: Settings, label: 'Settings' },
+const allNavItems = [
+  { href: '/admin/dashboard', icon: Gauge, label: 'Dashboard', roles: ['superadmin', 'admin'] },
+  { href: '/admin/announcements', icon: Megaphone, label: 'Announcements', roles: ['superadmin'] },
+  { href: '/admin/participants', icon: Users, label: 'Participants', roles: ['superadmin', 'admin'] },
+  { href: '/admin/submissions', icon: Camera, label: 'Submissions', roles: ['superadmin', 'admin'] },
+  { href: '/admin/branding', icon: Brush, label: 'Branding', roles: ['superadmin'] },
+  { href: '/admin/settings', icon: Settings, label: 'Settings', roles: ['superadmin'] },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [session, setSession] = useState<AdminSession | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const session = localStorage.getItem('admin_session');
-    if (session === 'true') {
-        setIsAdmin(true);
-    } else {
-        setIsAdmin(false);
+    try {
+      const sessionStr = localStorage.getItem('admin_session');
+      if (sessionStr) {
+        const sessionData: AdminSession = JSON.parse(sessionStr);
+        setSession(sessionData);
+      } else {
+        setSession(null);
+        if (pathname !== '/admin/login') {
+          router.replace('/admin/login');
+        }
+      }
+    } catch (error) {
+        setSession(null);
         if (pathname !== '/admin/login') {
             router.replace('/admin/login');
         }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [router, pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('admin_session');
+    setSession(null);
     router.push('/admin/login');
   };
 
+  const navItems = session ? allNavItems.filter(item => item.roles.includes(session.role)) : [];
+
   if (loading) {
     return (
-        <div className="flex h-screen items-center justify-center">
-            <Loader2 className="h-12 w-12 animate-spin" />
-        </div>
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin" />
+      </div>
     );
   }
-  
-  if (!isAdmin && pathname !== '/admin/login') {
-      return null;
-  }
-  
-  if (!isAdmin) {
-    return <>{children}</>;
+
+  if (!session && pathname !== '/admin/login') {
+    return null;
   }
 
+  if (!session) {
+    return <>{children}</>;
+  }
 
   return (
     <SidebarProvider>
@@ -136,16 +150,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                     <Avatar>
-                      <AvatarFallback>A</AvatarFallback>
+                      <AvatarFallback>{session.email.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Admin</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push('/admin/settings')}>
-                    Settings
+                  <DropdownMenuLabel>{session.role === 'superadmin' ? 'Super Admin' : 'Admin'}</DropdownMenuLabel>
+                   <DropdownMenuSeparator />
+                  <DropdownMenuItem disabled>
+                    {session.email}
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                   {session.role === 'superadmin' && (
+                    <DropdownMenuItem onClick={() => router.push('/admin/settings')}>
+                        Settings
+                    </DropdownMenuItem>
+                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
                 </DropdownMenuContent>

@@ -25,12 +25,15 @@ const formSchema = z.object({
   password: z.string().min(1, { message: "Password is required." }),
 });
 
-const ADMIN_EMAIL = "admin@contestzen.com";
-const ADMIN_PASS = "99230041300";
+// Mock user data with roles
+const ADMIN_USERS = {
+    "admin@contestzen.com": { pass: "99230041300", role: "superadmin" },
+    "viewer@contestzen.com": { pass: "password123", role: "admin" },
+};
 
-const setAdminSession = () => {
+const setAdminSession = (user: {email: string, role: string}) => {
     if (typeof window !== 'undefined') {
-        localStorage.setItem('admin_session', 'true');
+        localStorage.setItem('admin_session', JSON.stringify(user));
     }
 }
 
@@ -46,8 +49,10 @@ export function AdminLoginForm() {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    if (values.email === ADMIN_EMAIL && values.password === ADMIN_PASS) {
-        setAdminSession();
+    const adminUser = ADMIN_USERS[values.email as keyof typeof ADMIN_USERS];
+
+    if (adminUser && values.password === adminUser.pass) {
+        setAdminSession({email: values.email, role: adminUser.role});
         toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
         router.push("/admin/dashboard");
     } else {
