@@ -65,13 +65,16 @@ export function RegistrationForm() {
       const profilePhotoUrl = reader.result as string;
       const finalProfession = values.profession === 'Others' ? values.otherProfession : values.profession;
       
-      const { profilePhoto, ...restOfValues } = values;
+      const { profilePhoto, otherProfession, ...restOfValues } = values;
 
-      const { success, message } = await addParticipant({ 
+      const participantData = {
           ...restOfValues,
           profession: finalProfession!,
-          profilePhotoUrl 
-      });
+          profilePhotoUrl,
+          otherProfession: values.profession === 'Others' ? values.otherProfession : null,
+      };
+
+      const { success, message } = await addParticipant(participantData);
       
       if (success) {
         toast({

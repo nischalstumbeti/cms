@@ -12,6 +12,7 @@ export interface Participant {
   name: string;
   email: string;
   profession: string;
+  otherProfession?: string | null;
   gender: 'male' | 'female' | 'other' | 'prefer-not-to-say';
   profilePhotoUrl?: string;
 }
