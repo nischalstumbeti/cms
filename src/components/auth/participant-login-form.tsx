@@ -55,9 +55,9 @@ export function ParticipantLoginForm() {
       router.push("/submit");
     } else {
       toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: "No participant found with this email. Please register first.",
+        title: "Email Not Registered",
+        description: "This email address is not registered. Please register first to access the portal.",
+        variant: "default"
       });
       setIsLoading(false);
     }

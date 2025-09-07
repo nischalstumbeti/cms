@@ -1,10 +1,8 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { Button } from "@/components/ui/button";
@@ -17,102 +15,136 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
-import { useContest } from "@/context/ContestContext";
+import { Loader2, Shield, Mail, Lock } from "lucide-react";
 
 const formSchema = z.object({
-  email: z.string().email("A valid email is required."),
+  email: z.string().email({ message: "A valid email is required." }),
   password: z.string().min(1, { message: "Password is required." }),
 });
 
-const SUPER_ADMIN_CREDENTIALS = {
-    email: "admin@contestzen.com",
-    pass: "99230041300"
+interface AdminLoginFormProps {
+  onSuccess?: (admin: any, password?: string) => void;
 }
 
-const setAdminSession = (user: {email: string, role: string}) => {
-    if (typeof window !== 'undefined') {
-        localStorage.setItem('admin_session', JSON.stringify(user));
-    }
-}
-
-export function AdminLoginForm() {
-  const router = useRouter();
+export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
   const { toast } = useToast();
-  const { admins } = useContest();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-
-    // Check for Super Admin
-    if (values.email === SUPER_ADMIN_CREDENTIALS.email && values.password === SUPER_ADMIN_CREDENTIALS.pass) {
-        setAdminSession({email: values.email, role: 'superadmin'});
-        toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
-        router.push("/admin/dashboard");
-        return;
-    }
     
-    // Check for regular admins
-    const adminUser = admins.find(admin => admin.email === values.email);
-    // Note: In a real app, passwords should be hashed and checked securely on a server.
-    // For this prototype, we'll use a placeholder password "password123" for all created admins.
-    if (adminUser && values.password === 'password123') {
-        setAdminSession({email: values.email, role: adminUser.role});
-        toast({ title: "Login Successful", description: "Redirecting to dashboard..." });
-        router.push("/admin/dashboard");
-        return;
-    }
 
+    try {
+      const response = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
 
-    toast({
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${data.admin.name}!`,
+        });
+        if (onSuccess) {
+          onSuccess(data.admin, values.password);
+        }
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: data.error || "Invalid credentials",
+        });
+      }
+    } catch (error) {
+      toast({
         variant: "destructive",
-        title: "Login Failed",
-        description: "Invalid credentials.",
-    });
-    setIsLoading(false);
+        title: "Error",
+        description: "An unexpected error occurred.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="admin@contestzen.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Sign In
-        </Button>
-      </form>
-    </Form>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader className="text-center">
+        <div className="flex justify-center mb-4">
+          <div className="p-3 bg-primary/10 rounded-full">
+            <Shield className="h-8 w-8 text-primary" />
+          </div>
+        </div>
+        <CardTitle className="text-2xl">Admin Login</CardTitle>
+        <CardDescription>
+          Sign in to access the admin dashboard
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        placeholder="admin@example.com" 
+                        className="pl-10"
+                        {...field} 
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        type="password"
+                        placeholder="Enter your password" 
+                        className="pl-10"
+                        {...field} 
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Sign In
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }

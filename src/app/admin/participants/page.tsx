@@ -11,17 +11,39 @@ export default function ParticipantsPage() {
   const exportToCSV = () => {
     if (participants.length === 0) return;
 
-    const headers = Object.keys(participants[0]).join(',');
-    const rows = participants.map(p => 
-      Object.values(p).map(val => `"${String(val).replace(/"/g, '""')}"`).join(',')
-    );
+    // Define specific headers for better CSV structure
+    const headers = [
+      'ID',
+      'Name', 
+      'Email',
+      'Profession',
+      'Other Profession',
+      'Gender',
+      'Registration Date',
+      'Last Updated'
+    ];
 
-    const csvContent = [headers, ...rows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-s-8;' });
+    const rows = participants.map(p => [
+      p.id,
+      p.name,
+      p.email,
+      p.profession,
+      p.otherProfession || '',
+      p.gender,
+      p.created_at ? new Date(p.created_at).toLocaleDateString() : '',
+      p.updated_at ? new Date(p.updated_at).toLocaleDateString() : ''
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'participants.csv');
+    link.setAttribute('download', `participants-${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();

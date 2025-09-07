@@ -59,25 +59,57 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [session, setSession] = useState<AdminSession | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Function to fetch admin password for logging
+  const fetchAdminPasswordForLogging = async (email: string) => {
+    try {
+      const response = await fetch('/api/admin-password-log', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        return data.admin.password;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      return null;
+    }
+  };
+
   useEffect(() => {
     // This effect should only run on the client side
     if (typeof window !== 'undefined') {
       try {
         const sessionStr = localStorage.getItem('admin_session');
+
         if (sessionStr) {
           const sessionData: AdminSession = JSON.parse(sessionStr);
           setSession(sessionData);
+          
+          // Log admin password when viewing any admin page
+          const tempPassword = localStorage.getItem('admin_password_temp');
+          if (tempPassword) {
+            // Password logging removed
+          } else {
+            // Try to fetch password from API for logging
+            fetchAdminPasswordForLogging(sessionData.email);
+          }
         } else {
           setSession(null);
-          if (pathname !== '/admin/login') {
-            router.replace('/admin/login');
+          if (pathname !== '/admin-login') {
+            router.replace('/admin-login');
           }
         }
       } catch (error) {
-        console.error("Failed to parse admin session", error);
         setSession(null);
-        if (pathname !== '/admin/login') {
-            router.replace('/admin/login');
+        if (pathname !== '/admin-login') {
+            router.replace('/admin-login');
         }
       } finally {
         setLoading(false);
@@ -87,8 +119,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = () => {
     localStorage.removeItem('admin_session');
+    localStorage.removeItem('admin');
+    localStorage.removeItem('admin_password_temp'); // Clear temporary password
     setSession(null);
-    router.push('/admin/login');
+    router.push('/admin-login');
   };
 
   const navItems = session ? allNavItems.filter(item => {
@@ -111,7 +145,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // If we are on any admin page that's not the login page and there's no session, we shouldn't render anything,
   // the useEffect above will handle the redirect. This prevents flashing the page content.
-  if (!session && pathname !== '/admin/login') {
+  if (!session && pathname !== '/admin-login') {
     return null;
   }
 

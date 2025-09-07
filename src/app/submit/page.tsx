@@ -7,22 +7,63 @@ import { SubmissionForm } from '@/components/submission-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Logo } from '@/components/logo';
-import { Lightbulb, Frown } from 'lucide-react';
+import { Lightbulb, Frown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getCurrentUser } from '@/lib/auth';
 
 export default function SubmitPage() {
     const { activePrompt, participants } = useContest();
     const router = useRouter();
     const [participantId, setParticipantId] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Redirect to participant dashboard
+    useEffect(() => {
+        router.replace('/participant-dashboard');
+    }, [router]);
 
     useEffect(() => {
-        const storedId = localStorage.getItem('participant_session');
-        if (!storedId || !participants.find(p => p.id === storedId)) {
-            router.replace('/login');
-        } else {
-            setParticipantId(storedId);
-        }
+        const checkAuth = async () => {
+            try {
+                // First check if we have a valid Supabase session
+                const authData = await getCurrentUser();
+                
+                if (authData?.participant) {
+                    // User is authenticated via Supabase, use their participant ID
+                    setParticipantId(authData.participant.id);
+                    // Also set it in localStorage for consistency
+                    localStorage.setItem('participant_session', authData.participant.id);
+                } else {
+                    // Fallback to localStorage check for backward compatibility
+                    const storedId = localStorage.getItem('participant_session');
+                    if (storedId && participants.find(p => p.id === storedId)) {
+                        setParticipantId(storedId);
+                    } else {
+                        router.replace('/login');
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                router.replace('/login');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkAuth();
     }, [router, participants]);
+
+    if (isLoading) {
+        return (
+            <div className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
+                <div className="flex items-center space-x-2">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <span>Authenticating...</span>
+                </div>
+            </div>
+        );
+    }
 
     if (!participantId) {
         return null; // or a loading skeleton

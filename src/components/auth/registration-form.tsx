@@ -29,9 +29,10 @@ const formSchema = z.object({
   profession: z.string({ required_error: "Please select your profession." }),
   otherProfession: z.string().optional(),
   gender: z.enum(['male', 'female', 'other', 'prefer-not-to-say'], {required_error: "Please select a gender."}),
+  contestType: z.enum(['photography', 'videography'], {required_error: "Please select a contest type."}),
   profilePhoto: z.any().refine(file => file?.[0], "Profile photo is required."),
 }).refine(data => {
-    if (data.profession === 'Others') {
+    if (data.profession === 'other') {
         return !!data.otherProfession && data.otherProfession.length > 0;
     }
     return true;
@@ -63,7 +64,7 @@ export function RegistrationForm() {
     reader.readAsDataURL(values.profilePhoto[0]);
     reader.onload = async () => {
       const profilePhotoUrl = reader.result as string;
-      const finalProfession = values.profession === 'Others' ? values.otherProfession : values.profession;
+      const finalProfession = values.profession === 'other' ? values.otherProfession : values.profession;
       
       const { profilePhoto, otherProfession, ...restOfValues } = values;
 
@@ -71,7 +72,7 @@ export function RegistrationForm() {
           ...restOfValues,
           profession: finalProfession!,
           profilePhotoUrl,
-          otherProfession: values.profession === 'Others' ? values.otherProfession : null,
+          otherProfession: values.profession === 'other' ? values.otherProfession : null,
       };
 
       const { success, message } = await addParticipant(participantData);
@@ -111,7 +112,7 @@ export function RegistrationForm() {
             <FormItem>
               <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder="Nischal S Tumbeti" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -124,7 +125,7 @@ export function RegistrationForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="you@example.com" {...field} />
+                <Input placeholder="nischals@nextlinker.in" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -143,19 +144,21 @@ export function RegistrationForm() {
                     </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                        <SelectItem value="Student">Student</SelectItem>
-                        <SelectItem value="Employed (Govt/Private)">Employed (Govt/Private)</SelectItem>
-                        <SelectItem value="Self-Employed / Business">Self-Employed / Business</SelectItem>
-                        <SelectItem value="Homemaker">Homemaker</SelectItem>
-                        <SelectItem value="Retired">Retired</SelectItem>
-                        <SelectItem value="Others">Others</SelectItem>
+                        <SelectItem value="employee_private">Employee (Private Sector)</SelectItem>
+                        <SelectItem value="employee_government">Employee (Government)</SelectItem>
+                        <SelectItem value="student">Student</SelectItem>
+                        <SelectItem value="business_owner">Business Owner</SelectItem>
+                        <SelectItem value="freelancer">Freelancer</SelectItem>
+                        <SelectItem value="retired">Retired</SelectItem>
+                        <SelectItem value="unemployed">Unemployed</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                 </Select>
               <FormMessage />
             </FormItem>
           )}
         />
-        {professionValue === 'Others' && (
+        {professionValue === 'other' && (
             <FormField
             control={form.control}
             name="otherProfession"
@@ -187,6 +190,27 @@ export function RegistrationForm() {
                   <SelectItem value="female">Female</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                   <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="contestType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contest Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select contest type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="photography">Photography</SelectItem>
+                  <SelectItem value="videography">Videography</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

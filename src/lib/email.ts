@@ -1,12 +1,12 @@
 import nodemailer from 'nodemailer';
 
 const smtpConfig = {
-  host: 'mail.nextlinker.in',
-  port: 465,
+  host: process.env.SMTP_HOST || 'nextlinker.in',
+  port: parseInt(process.env.SMTP_PORT || '465'),
   secure: true, // true for 465, false for other ports
   auth: {
-    user: 'worldtourismday.nlr@nextlinker.in',
-    pass: '99230041300', // IMPORTANT: Use environment variables in production
+    user: process.env.SMTP_USER || 'worldtourismday.nlr@nextlinker.in',
+    pass: process.env.SMTP_PASS || '99230041300@nlr',
   },
 };
 
