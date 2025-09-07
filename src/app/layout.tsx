@@ -4,7 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'ContestZen',
+  title: 'Chitra Manthan',
   description: 'Unleash Creativity, Seamlessly.',
 };
 
