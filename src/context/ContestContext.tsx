@@ -1215,7 +1215,7 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
 
   const generateOTP = async (email: string) => {
     try {
-      const response = await fetch('/api/generate-otp', {
+      const response = await fetch('/api/participant-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1226,31 +1226,31 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error('Error generating OTP:', error);
+      console.error('Error generating magic link:', error);
       return { 
         success: false, 
-        message: 'Failed to generate OTP. Please try again.' 
+        message: 'Failed to send magic link. Please try again.' 
       };
     }
   }
 
-  const verifyOTP = async (email: string, otp: string) => {
+  const verifyOTP = async (email: string, token: string) => {
     try {
-      const response = await fetch('/api/verify-otp', {
+      const response = await fetch('/api/verify-magic-link', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, otp }),
+        body: JSON.stringify({ email, token }),
       });
 
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error('Error verifying OTP:', error);
+      console.error('Error verifying magic link:', error);
       return { 
         success: false, 
-        message: 'Failed to verify OTP. Please try again.' 
+        message: 'Failed to verify magic link. Please try again.' 
       };
     }
   }

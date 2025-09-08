@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { sendOTP } from "@/lib/auth";
+// Removed sendOTP import - using direct API call instead
 import { Loader2, Mail, Shield, ArrowLeft, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -49,7 +49,15 @@ export function ParticipantMagicLinkLoginForm() {
     setUserEmail(values.email);
     
     try {
-      const result = await sendOTP(values.email);
+      const response = await fetch('/api/participant-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: values.email }),
+      });
+
+      const result = await response.json();
       
       if (result.success) {
         toast({
@@ -64,6 +72,12 @@ export function ParticipantMagicLinkLoginForm() {
             title: "Email Not Registered",
             description: "This email address is not registered. Please register first to access the portal.",
             variant: "default"
+          });
+        } else if (result.message.includes('Login not enabled by admin')) {
+          toast({
+            title: "Login Not Allowed",
+            description: result.message,
+            variant: "destructive"
           });
         } else {
           toast({
@@ -87,7 +101,15 @@ export function ParticipantMagicLinkLoginForm() {
   const resendMagicLink = async () => {
     setIsLoading(true);
     try {
-      const result = await sendOTP(userEmail);
+      const response = await fetch('/api/participant-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: userEmail }),
+      });
+
+      const result = await response.json();
       toast({
         title: result.success ? "Magic Link Resent" : "Error",
         description: result.message,

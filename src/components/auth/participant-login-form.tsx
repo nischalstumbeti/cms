@@ -42,23 +42,40 @@ export function ParticipantLoginForm() {
     defaultValues: { email: "" },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    const participant = participants.find(p => p.email === values.email);
+    
+    try {
+      const response = await fetch('/api/participant-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: values.email }),
+      });
 
-    if (participant) {
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "Magic Link Sent",
+          description: result.message,
+        });
+      } else {
+        toast({
+          title: "Login Failed",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
       toast({
-        title: "Login Successful",
-        description: "Welcome back!",
+        title: "Error",
+        description: "An error occurred. Please try again.",
+        variant: "destructive"
       });
-      setSession(participant.id);
-      router.push("/submit");
-    } else {
-      toast({
-        title: "Email Not Registered",
-        description: "This email address is not registered. Please register first to access the portal.",
-        variant: "default"
-      });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -81,7 +98,7 @@ export function ParticipantLoginForm() {
         />
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Sign In
+          Send Login Link
         </Button>
       </form>
     </Form>
