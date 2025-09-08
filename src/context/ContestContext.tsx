@@ -709,6 +709,9 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
 
   const addParticipant = async (participantData: Omit<Participant, 'id'>) => {
     try {
+      console.log('Starting addParticipant with data:', participantData);
+      console.log('Supabase client:', supabase);
+      console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
       
       // Check if email already exists
       const { data: existingParticipant, error: checkError } = await supabase
@@ -738,10 +741,61 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
         upload_enabled: false // Default to false, admin can enable later
       };
       
-      const { data, error } = await supabase
-        .from('participants')
-        .insert([dbParticipantData])
-        .select();
+      console.log('Database participant data:', dbParticipantData);
+      console.log('About to insert into participants table...');
+      
+      // Use direct HTTP request instead of Supabase client
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      const requestUrl = `${supabaseUrl}/rest/v1/participants`;
+      const requestBody = JSON.stringify([dbParticipantData]);
+      
+      console.log('=== HTTP REQUEST DETAILS ===');
+      console.log('Method: POST');
+      console.log('URL:', requestUrl);
+      console.log('Headers:', {
+        'Content-Type': 'application/json',
+        'apikey': supabaseKey ? 'Present' : 'Missing',
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Prefer': 'return=representation'
+      });
+      console.log('Request Body:', requestBody);
+      console.log('============================');
+      
+      // Make direct HTTP request
+      const response = await fetch(requestUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseKey!,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Prefer': 'return=representation'
+        },
+        body: requestBody
+      });
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      let data = null;
+      let error = null;
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log('Error response body:', errorText);
+        error = {
+          message: `HTTP ${response.status}: ${response.statusText}`,
+          status: response.status,
+          statusText: response.statusText,
+          details: errorText
+        };
+      } else {
+        data = await response.json();
+        console.log('Success response body:', data);
+      }
+        
+      console.log('Insert result - data:', data);
+      console.log('Insert result - error:', error);
 
       if (error) {
         console.error('Error inserting participant:', error);
@@ -749,8 +803,12 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
           message: error.message,
           code: error.code,
           details: error.details,
-          hint: error.hint
+          hint: error.hint,
+          fullError: JSON.stringify(error, null, 2)
         });
+        console.error('Raw error object:', error);
+        console.error('Error type:', typeof error);
+        console.error('Error constructor:', error.constructor.name);
         throw error;
       }
       
@@ -761,8 +819,12 @@ export const ContestProvider = ({ children }: { children: ReactNode }) => {
         message: error instanceof Error ? error.message : 'Unknown error',
         code: (error as any)?.code,
         details: (error as any)?.details,
-        hint: (error as any)?.hint
+        hint: (error as any)?.hint,
+        fullError: JSON.stringify(error, null, 2)
       });
+      console.error('Raw error object:', error);
+      console.error('Error type:', typeof error);
+      console.error('Error constructor:', error?.constructor?.name);
       return { success: false, message: "Registration failed. Please try again." };
     }
   };

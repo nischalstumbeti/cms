@@ -26,7 +26,11 @@ export interface Database {
           profession: string
           other_profession?: string | null
           gender: 'male' | 'female' | 'other' | 'prefer-not-to-say'
+          contest_type?: 'photography' | 'videography' | null
           profile_photo_url?: string
+          upload_enabled?: boolean
+          auth_id?: string | null
+          login_enabled?: boolean
           created_at: string
           updated_at: string
         }
@@ -37,7 +41,11 @@ export interface Database {
           profession: string
           other_profession?: string | null
           gender: 'male' | 'female' | 'other' | 'prefer-not-to-say'
+          contest_type?: 'photography' | 'videography' | null
           profile_photo_url?: string
+          upload_enabled?: boolean
+          auth_id?: string | null
+          login_enabled?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -48,7 +56,11 @@ export interface Database {
           profession?: string
           other_profession?: string | null
           gender?: 'male' | 'female' | 'other' | 'prefer-not-to-say'
+          contest_type?: 'photography' | 'videography' | null
           profile_photo_url?: string
+          upload_enabled?: boolean
+          auth_id?: string | null
+          login_enabled?: boolean
           created_at?: string
           updated_at?: string
         }
